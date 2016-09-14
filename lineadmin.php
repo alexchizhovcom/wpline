@@ -9,7 +9,6 @@ error_reporting(E_ALL);
  * @author LINE Internet Development (c) <sales@line-corp.ru> 
  */
 require_once('wp-blog-header.php');
-require_once('wp-includes/registration.php');
 require_once('wp-admin/includes/template.php');
 require_once('wp-admin/includes/user.php');
 ?>
