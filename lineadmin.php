@@ -5,10 +5,32 @@ error_reporting(E_ALL);
 /**
  * Script file to work with WordPress users via PHP and GET requests
  * 
+ * Requirements:
+ * PHP 5.x
+ * WordPress 2.8
+ * 
+ * get_user_by          @since 2.8
+ * wp_set_password      @since 2.5
+ * wp_delete_user       @since 2.0
+ * WP_User::set_role    @since 2.0
+ * wp_dropdown_roles    @since 2.1
+ * esc_attr             @since 2.8
+ * esc_html             @since 2.8
+ * get_bloginfo         @since 0.71
+ * wp_create_user       @since 2.0
+ * username_exists      @since 2.0
+ * email_exists         @since 2.1
+ * 
  * @author Alex Chizhov <ac@alexchizhov.com> 
  * @author LINE Internet Development (c) <sales@line-corp.ru> 
  */
 require_once('wp-blog-header.php');
+
+$version = get_bloginfo('version');
+
+if ($version < 3.1)
+    require_once('wp-includes/registration.php');
+
 require_once('wp-admin/includes/template.php');
 require_once('wp-admin/includes/user.php');
 ?>
@@ -118,7 +140,7 @@ require_once('wp-admin/includes/user.php');
 
                 echo '<h3>CHANGING USER ROLE</h3>';
 
-                $UserCR = get_user_by('ID', $_POST['userid']);
+                $UserCR = get_user_by('id', $_POST['userid']);
 
                 if ($UserCR instanceof WP_User && isset($UserCR->ID) && is_int($UserCR->ID)) {
 
@@ -130,7 +152,7 @@ require_once('wp-admin/includes/user.php');
                     echo '<p>WARNING: Something went wrong. Role wasn\'t changed.</p>';
                 }
             }
-            
+
             // CHANGE PASSWORD
             if (
                     isset($_POST['action']) &&
@@ -138,25 +160,21 @@ require_once('wp-admin/includes/user.php');
                     isset($_POST['userid']) &&
                     isset($_POST['password'])
             ) {
-                
+
                 echo '<h3>CHANGING PASSWORD</h3>';
-                
-                $UserCP = get_user_by('ID', $_POST['userid']);
-                
+
+                $UserCP = get_user_by('id', $_POST['userid']);
+
                 if ($UserCP instanceof WP_User) {
-                    
+
                     wp_set_password($_POST['password'], $_POST['userid']);
-                    
-                    echo '<p>Password for User with ID <strong>'.intval($_POST['userid']).'</strong> was successfully changed! You can now login using your new password: <strong>'.esc_html($_POST['password']).'</strong></p>';
-                    
+
+                    echo '<p>Password for User with ID <strong>' . intval($_POST['userid']) . '</strong> was successfully changed! You can now login using your new password: <strong>' . esc_html($_POST['password']) . '</strong></p>';
                 } else {
-                    
-                    echo '<p>User with ID <strong>'.intval($_POST['userid']).'</strong> doesn\'t exist.</p>';
-                    
+
+                    echo '<p>User with ID <strong>' . intval($_POST['userid']) . '</strong> doesn\'t exist.</p>';
                 }
-                
             }
-            
         }
 
         // DELETE USER
@@ -170,7 +188,7 @@ require_once('wp-admin/includes/user.php');
 
             echo '<h3>DELETING USER</h3>';
 
-            $UserDU = get_user_by('ID', $_GET['userid']);
+            $UserDU = get_user_by('id', $_GET['userid']);
 
             if ($UserDU instanceof WP_User) {
 
@@ -237,13 +255,13 @@ require_once('wp-admin/includes/user.php');
                         </td>
                         <td>
                             <strong style="display:block;margin-bottom:10px;">Change password</strong>
-                            
-                            <form action="<?=$_SERVER['PHP_SELF']?>" method="post">
+
+                            <form action="<?= esc_attr($_SERVER['PHP_SELF']) ?>" method="post">
                                 <input type="text" name="password" placeholder="Enter new password">
-                                
+
                                 <input type="hidden" name="action" value="changepassword">
-                                <input type="hidden" name="userid" value="<?=intval($User->ID)?>">
-                                
+                                <input type="hidden" name="userid" value="<?= intval($User->ID) ?>">
+
                                 <input type="submit" value="Change password">
                             </form>
                         </td>
